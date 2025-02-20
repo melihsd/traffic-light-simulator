@@ -1,10 +1,15 @@
-import { TrafficLightContainer, Light, BaseTrafficLightProps } from './BaseTrafficLight';
+import {
+  TrafficLightContainer,
+  Light,
+  BaseTrafficLightProps,
+} from "./BaseTrafficLight";
 
 export enum LightState {
+  Off,
   Red,
   RedYellow,
   Yellow,
-  Green
+  Green,
 }
 
 interface TrafficLightProps extends BaseTrafficLightProps {
@@ -14,18 +19,15 @@ interface TrafficLightProps extends BaseTrafficLightProps {
 export function TrafficLight({ state, className }: TrafficLightProps) {
   return (
     <TrafficLightContainer className={className}>
-      <Light 
+      <Light
         $isOn={state === LightState.Red || state === LightState.RedYellow}
         $color="#ff0000"
       />
-      <Light 
+      <Light
         $isOn={state === LightState.Yellow || state === LightState.RedYellow}
         $color="#ffff00"
       />
-      <Light 
-        $isOn={state === LightState.Green}
-        $color="#00ff00"
-      />
+      <Light $isOn={state === LightState.Green} $color="#00ff00" />
     </TrafficLightContainer>
   );
 }
