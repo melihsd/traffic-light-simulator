@@ -22,14 +22,9 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.png" />
       </Head>
-      <div
-        className={`${styles.page} ${geistSans.variable} ${geistMono.variable}`}
-      >
+      <main className={`${styles.page} ${geistSans.variable} ${geistMono.variable}`} >
           <App />
-        <footer className={styles.footer}>
-          by Melih
-        </footer>
-      </div>
+      </main>
     </>
   );
 }

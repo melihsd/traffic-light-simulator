@@ -7,7 +7,7 @@
   grid-template-columns: 1fr 120px 1fr;
   grid-template-rows: 1fr 120px 1fr;
   /* Name grid areas for better readability */
-  grid-template-areas: 
+  grid-template-areas:
     "top-left     north        top-right"
     "west         center       east"
     "bottom-left  south        bottom-right";
@@ -38,6 +38,9 @@
   justify-self: center;
   align-self: end;
   margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .startButtonContainer {
