@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { Geist, Geist_Mono } from "next/font/google";
 import styles from "@/styles/Home.module.css";
-import { TrafficLight, LightState } from '@/components/TrafficLight';
+import { App } from '@/components/App';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,8 +25,9 @@ export default function Home() {
       <div
         className={`${styles.page} ${geistSans.variable} ${geistMono.variable}`}
       >
+        <h1>Traffic Light Simulator</h1>
         <main className={styles.main}>
-          <TrafficLight state={LightState.Red} />
+          <App />
         </main>
         <footer className={styles.footer}>
           by Melih

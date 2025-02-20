@@ -1,0 +1,53 @@
+.intersection {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  /* Define a 3x3 grid with 120px for roads and remaining space for corners */
+  grid-template-columns: 1fr 120px 1fr;
+  grid-template-rows: 1fr 120px 1fr;
+  /* Name grid areas for better readability */
+  grid-template-areas: 
+    "top-left     north        top-right"
+    "west         center       east"
+    "bottom-left  south        bottom-right";
+  overflow: hidden;
+}
+
+/* Main road traffic light - positioned in top-left corner */
+.main-road {
+  grid-area: top-left;
+  justify-self: end;
+  align-self: end;
+  margin-bottom: 1rem;
+  margin-right: 1rem;
+}
+
+/* Side road traffic light - positioned in bottom-right corner */
+.side-road {
+  grid-area: bottom-right;
+  justify-self: start;
+  align-self: start;
+  margin-top: 1rem;
+  margin-left: 1rem;
+}
+
+/* Pedestrian traffic light - positioned in bottom-left corner */
+.pedestrian {
+  grid-area: top-right;
+  justify-self: center;
+  align-self: end;
+  margin-bottom: 10px;
+}
+
+.startButton {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+}
+
+.pedestrianRequestButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
