@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { TrafficLight, LightState } from "@/components/TrafficLight";
 import { PedestrianLight, PedestrianState } from "@/components/PedestrianLight";
-import { Button } from "@mui/material";
-import { Road } from "./Road";
-import styles from "@/styles/Intersection.module.css";
+import { Road } from "@/components/Road";
+import { Crosswalk } from "@/components/Crosswalk";
 import { IconCircleDot } from "@/assets/IconCircleDot";
 import { IconButton } from "@mui/material";
 export function App() {
@@ -28,15 +27,19 @@ export function App() {
           className={`horizontal-rtl ${styles["main-road"]}`}
         />
         <TrafficLight state={sideRoad} className={styles["side-road"]} />
+
         <div className={styles.pedestrian}>
           <PedestrianLight state={pedestrian} />
-          <IconButton
-            aria-label="Pedestrian Request"
-            color={pedestrianRequest ? "secondary" : "primary"}
-            onClick={() => setPedestrianRequest(true)}
-          >
-            <IconCircleDot />
-          </IconButton>
+          <PedestrianButton
+            isRunning={isRunning}
+            state={pedestrian}
+            isRequested={pedestrianRequest}
+            onRequest={requestPedestrian}
+          />
+        </div>
+
+        <div className={styles.crosswalk}>
+          <Crosswalk />
         </div>
       </div>
     </div>

@@ -32,7 +32,7 @@
   margin-left: 1rem;
 }
 
-/* Pedestrian traffic light - positioned in bottom-left corner */
+/* Pedestrian traffic light - positioned in top-right corner */
 .pedestrian {
   grid-area: top-right;
   justify-self: center;
@@ -41,6 +41,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Crosswalk position */
+.crosswalk {
+  grid-area: east;
+  justify-self: center;
+  align-self: center;
+  width: 60px;
+  height: 100%;
+  z-index: 10;
+  background-color: var(--road);
+  padding: 5px;
 }
 
 .startButtonContainer {

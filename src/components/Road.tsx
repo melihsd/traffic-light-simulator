@@ -39,7 +39,7 @@ export function Road({ horizontal }: RoadProps) {
           height: horizontal ? 0 : "100vh",
           borderStyle: "dashed",
           borderColor: "white",
-          borderWidth: horizontal ? "2px 0 0 0" : "0 2px 0 0",
+          borderWidth: horizontal ? "2px 0" : "0 2px",
           zIndex: 2,
         }}
       />
