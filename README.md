@@ -1,6 +1,6 @@
 # 🚦 Traffic Light Simulator
 
-[![Jest Tests](https://github.com/your-username/traffic-control/actions/workflows/tests.yml/badge.svg)](https://github.com/your-username/traffic-control/actions)
+[![Tests](https://github.com/melihsd/traffic-light-simulator/actions/workflows/tests.yml/badge.svg)](https://github.com/melihsd/traffic-light-simulator/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A modern traffic light simulation system built with React and Material UI.
@@ -20,8 +20,8 @@ A modern traffic light simulation system built with React and Material UI.
 
 ### Installation
 ```bash
-git clone https://github.com/your-username/traffic-control.git
-cd traffic-control
+git clone https://github.com/melihsd/traffic-light-simulator.git
+cd traffic-light-simulator
 bun install
 ```
 
@@ -39,4 +39,4 @@ bun test
 Pull requests welcome! Please follow the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## 📄 License
-MIT © 2024 Your Name
+MIT © 2024 Melih
