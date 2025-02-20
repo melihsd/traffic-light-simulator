@@ -12,9 +12,9 @@ export function IconCircleDot() {
         <g
           fill="none"
           stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
           color="currentColor"
         >
           <path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0" />
