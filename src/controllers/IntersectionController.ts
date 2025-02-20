@@ -59,10 +59,7 @@ export class IntersectionController {
   private clearAllTimers(): void {
     this.timers.forEach(clearTimeout);
     this.timers = [];
-    if (this.blinkTimer) {
-      clearInterval(this.blinkTimer);
-      this.blinkTimer = undefined;
-    }
+
     if (this.statusTimer) {
       clearInterval(this.statusTimer);
       this.statusTimer = undefined;
@@ -138,7 +135,6 @@ export class IntersectionController {
         currentPhase: this.currentPhase,
         isRunning: this.isRunning,
         statusText: PHASE_DESCRIPTIONS[this.currentPhase],
-        isBlinking: !this.isRunning,
       };
       this.onStateChange(state);
     } catch (error) {
@@ -432,7 +428,6 @@ export class IntersectionController {
       currentPhase: this.currentPhase,
       isRunning: this.isRunning,
       statusText: PHASE_DESCRIPTIONS[this.currentPhase],
-      isWarning: !this.isRunning,
     };
   }
 }

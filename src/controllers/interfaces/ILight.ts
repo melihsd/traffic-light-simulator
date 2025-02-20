@@ -6,16 +6,6 @@ export interface ILight<TState> {
   dispose(): void;
 }
 
-export interface ITimedLight<TState> extends ILight<TState> {
-  turnGreen(): Promise<void>;
-  turnRed(): Promise<void>;
-}
-
-export interface IRequestableLight<TState> extends ILight<TState> {
-  hasRequest(): boolean;
-  requestChange(): void;
-}
-
 export interface IStateChangeNotifier<TState> {
   onStateChange?: (state: TState) => void;
 }

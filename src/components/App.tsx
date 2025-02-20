@@ -65,7 +65,6 @@ export function App() {
     pedestrianRequest,
     isRunning,
     statusText,
-    isBlinking,
     start,
     stop,
     requestPedestrian,
@@ -88,21 +87,15 @@ export function App() {
           state={mainRoad}
           className={`horizontal-rtl ${styles["main-road"]}`}
           type="vehicle"
-          isBlinking={isBlinking}
         />
         <TrafficLight
           state={sideRoad}
           className={styles["side-road"]}
           type="vehicle"
-          isBlinking={isBlinking}
         />
 
         <div className={styles.pedestrian}>
-          <TrafficLight
-            state={pedestrian}
-            type="pedestrian"
-            isBlinking={isBlinking}
-          />
+          <TrafficLight state={pedestrian} type="pedestrian" />
           <PedestrianButton
             isRunning={isRunning}
             state={pedestrian}

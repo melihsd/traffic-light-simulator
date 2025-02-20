@@ -61,14 +61,6 @@ const Light = styled("div")<{
   },
 }));
 
-export enum LightState {
-  Off,
-  Red,
-  RedYellow,
-  Yellow,
-  Green,
-}
-
 interface TrafficLightProps {
   state: LightStateCode;
   className?: string;

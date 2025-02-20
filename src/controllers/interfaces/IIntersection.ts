@@ -9,7 +9,6 @@ export interface IntersectionState {
   isRunning: boolean;
   currentPhase: Phase;
   statusText: string;
-  isBlinking: boolean;
 }
 
 export type IntersectionStateCallback = (state: IntersectionState) => void;

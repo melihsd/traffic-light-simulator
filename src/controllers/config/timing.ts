@@ -1,5 +1,3 @@
-import { ITimingConfig } from "../interfaces/ILight";
-
 export const TIMING = {
   BLINK_INTERVAL: 500,
   DEFAULT: {
