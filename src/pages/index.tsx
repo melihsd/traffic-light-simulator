@@ -25,10 +25,7 @@ export default function Home() {
       <div
         className={`${styles.page} ${geistSans.variable} ${geistMono.variable}`}
       >
-        <h1>Traffic Light Simulator</h1>
-        <main className={styles.main}>
           <App />
-        </main>
         <footer className={styles.footer}>
           by Melih
         </footer>

@@ -40,10 +40,11 @@
   margin-bottom: 10px;
 }
 
-.startButton {
-  position: absolute;
-  top: 20px;
-  left: 50%;
+.startButtonContainer {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 1rem;
 }
 
 .pedestrianRequestButton {

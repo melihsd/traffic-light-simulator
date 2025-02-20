@@ -13,9 +13,11 @@ export function App() {
   
     return (
       <div className="App">
-        <Button variant="contained" className={styles.startButton}>
-          Start
-        </Button>
+        
+        <div className={styles.startButtonContainer}>
+        <h1>Traffic Light Simulator</h1>
+          <Button variant="contained" className={styles.startButton}>START</Button>
+        </div>
         <div className={styles.intersection}>
           <Road horizontal />
           <Road />
