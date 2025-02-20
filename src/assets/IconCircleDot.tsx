@@ -1,4 +1,4 @@
-import { SvgIcon } from '@mui/material';
+import { SvgIcon } from "@mui/material";
 
 export function IconCircleDot() {
   return (
@@ -11,10 +11,11 @@ export function IconCircleDot() {
       >
         <g
           fill="none"
-          stroke="#fff"
+          stroke="currentColor"
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
+          color="currentColor"
         >
           <path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0" />
           <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />

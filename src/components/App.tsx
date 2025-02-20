@@ -30,7 +30,11 @@ export function App() {
         <TrafficLight state={sideRoad} className={styles["side-road"]} />
         <div className={styles.pedestrian}>
           <PedestrianLight state={pedestrian} />
-          <IconButton aria-label="fingerprint" color="secondary">
+          <IconButton
+            aria-label="Pedestrian Request"
+            color={pedestrianRequest ? "secondary" : "primary"}
+            onClick={() => setPedestrianRequest(true)}
+          >
             <IconCircleDot />
           </IconButton>
         </div>
