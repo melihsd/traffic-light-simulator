@@ -1,15 +1,15 @@
-import { LightState } from "@/components/TrafficLight";
-import { PedestrianState } from "@/components/PedestrianLight";
-import { IntersectionPhase } from "../config/phases";
+import { LightStateCode } from "@/controllers/LightController";
+import { Phase } from "../config/phases";
 
 export interface IntersectionState {
-  mainRoad: LightState;
-  sideRoad: LightState;
-  pedestrian: PedestrianState;
+  mainRoad: LightStateCode;
+  sideRoad: LightStateCode;
+  pedestrian: LightStateCode;
   pedestrianRequest: boolean;
   isRunning: boolean;
-  currentPhase: IntersectionPhase;
+  currentPhase: Phase;
   statusText: string;
+  isBlinking: boolean;
 }
 
 export type IntersectionStateCallback = (state: IntersectionState) => void;

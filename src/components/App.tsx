@@ -1,10 +1,10 @@
 import { Button, IconButton } from "@mui/material";
 import { TrafficLight } from "@/components/TrafficLight";
-import { PedestrianLight, PedestrianState } from "@/components/PedestrianLight";
 import { Road } from "@/components/Road";
 import { Crosswalk } from "@/components/Crosswalk";
 import { IconCircleDot } from "@/assets/IconCircleDot";
 import { useTrafficLight } from "@/hooks/useTrafficLight";
+import { LightStateCode } from "@/controllers/LightController";
 import styles from "@/styles/Intersection.module.css";
 
 function ControlPanel({
@@ -39,12 +39,11 @@ function PedestrianButton({
   onRequest,
 }: {
   isRunning: boolean;
-  state: PedestrianState;
+  state: LightStateCode;
   isRequested: boolean;
   onRequest: () => void;
 }) {
-  const isDisabled =
-    !isRunning || isRequested || state === PedestrianState.Green;
+  const isDisabled = !isRunning || isRequested || state === LightStateCode.GO;
 
   return (
     <IconButton
@@ -66,6 +65,7 @@ export function App() {
     pedestrianRequest,
     isRunning,
     statusText,
+    isBlinking,
     start,
     stop,
     requestPedestrian,
@@ -87,11 +87,22 @@ export function App() {
         <TrafficLight
           state={mainRoad}
           className={`horizontal-rtl ${styles["main-road"]}`}
+          type="vehicle"
+          isBlinking={isBlinking}
         />
-        <TrafficLight state={sideRoad} className={styles["side-road"]} />
+        <TrafficLight
+          state={sideRoad}
+          className={styles["side-road"]}
+          type="vehicle"
+          isBlinking={isBlinking}
+        />
 
         <div className={styles.pedestrian}>
-          <PedestrianLight state={pedestrian} />
+          <TrafficLight
+            state={pedestrian}
+            type="pedestrian"
+            isBlinking={isBlinking}
+          />
           <PedestrianButton
             isRunning={isRunning}
             state={pedestrian}

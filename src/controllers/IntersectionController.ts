@@ -1,8 +1,6 @@
-import { VehicleLightController } from "@/controllers/VehicleLightController";
-import { PedestrianLightController } from "@/controllers/PedestrianLightController";
-import { LightState } from "@/components/TrafficLight";
-import { PedestrianState } from "@/components/PedestrianLight";
-import { TIMING, PHASE_TIMINGS } from "./config/timing";
+import { LightController } from "@/controllers/LightController";
+import { LightStateCode } from "@/controllers/LightController";
+import { TIMING } from "./config/timing";
 import { Phase, PHASE_DESCRIPTIONS } from "./config/phases";
 import {
   IntersectionState,
@@ -28,22 +26,25 @@ const ERROR_MESSAGES = {
 } as const;
 
 export class IntersectionController {
-  private readonly mainRoadLight: VehicleLightController =
-    new VehicleLightController(LightState.Yellow, {
-      onStateChange: () => this.notifyStateChange(),
-    });
-  private readonly sideRoadLight: VehicleLightController =
-    new VehicleLightController(LightState.Yellow, {
-      onStateChange: () => this.notifyStateChange(),
-    });
-  private readonly pedestrianLight: PedestrianLightController =
-    new PedestrianLightController({
-      onStateChange: () => this.notifyStateChange(),
-    });
+  private readonly mainRoadLight: LightController = new LightController(
+    "vehicle",
+    LightStateCode.WARNING,
+    { onStateChange: () => this.notifyStateChange() }
+  );
+  private readonly sideRoadLight: LightController = new LightController(
+    "vehicle",
+    LightStateCode.WARNING,
+    { onStateChange: () => this.notifyStateChange() }
+  );
+  private readonly pedestrianLight: LightController = new LightController(
+    "pedestrian",
+    LightStateCode.WARNING,
+    { onStateChange: () => this.notifyStateChange() }
+  );
+
   private currentPhase: Phase = Phase.STOPPED;
   private isRunning: boolean = false;
   private timers: NodeJS.Timeout[] = [];
-  private blinkTimer?: NodeJS.Timeout;
   private statusTimer?: NodeJS.Timeout;
   private lastPhaseChange: number = 0;
 
@@ -51,39 +52,8 @@ export class IntersectionController {
     private readonly onStateChange?: IntersectionStateCallback,
     private readonly timingConfig: typeof TIMING = TIMING
   ) {
-    this.validateTimingConfig();
-    this.startBlinking();
+    this.setInitialLightStates();
     this.startStatusUpdates();
-  }
-
-  private validateTimingConfig(): void {
-    const requiredFields = [
-      "BLINK_INTERVAL",
-      "DEFAULT",
-      "MAIN_ROAD",
-      "PEDESTRIAN",
-    ] as const;
-
-    // Check required fields
-    for (const field of requiredFields) {
-      if (!(field in this.timingConfig)) {
-        throw new Error(ERROR_MESSAGES.INVALID_TIMING(field));
-      }
-    }
-
-    // Validate safety constraints
-    if (
-      this.timingConfig.DEFAULT.yellow <
-      SAFETY_CONSTRAINTS.MIN_YELLOW_DURATION_MS
-    ) {
-      throw new Error(ERROR_MESSAGES.YELLOW_DURATION);
-    }
-    if (
-      this.timingConfig.PEDESTRIAN.green <
-      SAFETY_CONSTRAINTS.MIN_PEDESTRIAN_GREEN_MS
-    ) {
-      throw new Error(ERROR_MESSAGES.PEDESTRIAN_DURATION);
-    }
   }
 
   private clearAllTimers(): void {
@@ -133,46 +103,17 @@ export class IntersectionController {
     }
   }
 
-  private startBlinking(): void {
-    this.stopBlinking();
-    this.setInitialLightStates();
-    this.startBlinkingCycle();
-  }
-
-  private stopBlinking(): void {
-    if (this.blinkTimer) {
-      clearInterval(this.blinkTimer);
-      this.blinkTimer = undefined;
-    }
-  }
-
   private setInitialLightStates(): void {
-    this.mainRoadLight.setState(LightState.Yellow);
-    this.sideRoadLight.setState(LightState.Yellow);
+    this.mainRoadLight.setState({
+      state: LightStateCode.WARNING,
+    });
+    this.sideRoadLight.setState({
+      state: LightStateCode.WARNING,
+    });
     this.pedestrianLight.setState({
-      state: PedestrianState.Red,
+      state: LightStateCode.WARNING,
       hasRequest: false,
     });
-  }
-
-  private startBlinkingCycle(): void {
-    let isBlinkOn = true;
-    this.blinkTimer = setInterval(() => {
-      if (!this.isRunning) {
-        isBlinkOn = !isBlinkOn;
-        const vehicleState = isBlinkOn ? LightState.Yellow : LightState.Off;
-        const pedestrianState = isBlinkOn
-          ? PedestrianState.Red
-          : PedestrianState.Off;
-
-        this.mainRoadLight.setState(vehicleState);
-        this.sideRoadLight.setState(vehicleState);
-        this.pedestrianLight.setState({
-          state: pedestrianState,
-          hasRequest: false,
-        });
-      }
-    }, this.timingConfig.BLINK_INTERVAL);
   }
 
   private startStatusUpdates(): void {
@@ -190,13 +131,14 @@ export class IntersectionController {
 
     try {
       const state: IntersectionState = {
-        mainRoad: this.mainRoadLight.getState(),
-        sideRoad: this.sideRoadLight.getState(),
+        mainRoad: this.mainRoadLight.getState().state,
+        sideRoad: this.sideRoadLight.getState().state,
         pedestrian: this.pedestrianLight.getState().state,
         pedestrianRequest: this.pedestrianLight.hasRequest(),
         currentPhase: this.currentPhase,
         isRunning: this.isRunning,
         statusText: PHASE_DESCRIPTIONS[this.currentPhase],
+        isBlinking: !this.isRunning,
       };
       this.onStateChange(state);
     } catch (error) {
@@ -210,23 +152,21 @@ export class IntersectionController {
     }
 
     try {
-      // Pedestrian crossing phase
       this.pedestrianLight.setState({
-        state: PedestrianState.Green,
+        state: LightStateCode.GO,
         hasRequest: false,
       });
       await this.setPhase(Phase.PED_ONLY, this.timingConfig.PEDESTRIAN.green);
 
       this.pedestrianLight.setState({
-        state: PedestrianState.Red,
+        state: LightStateCode.STOP,
         hasRequest: false,
       });
       return true;
     } catch (error) {
       console.error("Error handling pedestrian request:", error);
-      // Reset to safe state
       this.pedestrianLight.setState({
-        state: PedestrianState.Red,
+        state: LightStateCode.STOP,
         hasRequest: false,
       });
       return false;
@@ -235,42 +175,69 @@ export class IntersectionController {
 
   private async transitionToMainRoad(): Promise<void> {
     try {
-      this.mainRoadLight.setState(LightState.RedYellow);
+      // Ensure all other lights are red
+      this.sideRoadLight.setState({ state: LightStateCode.STOP });
+      this.pedestrianLight.setState({ state: LightStateCode.STOP });
+
+      // Wait between phases
+      await this.wait(this.timingConfig.DEFAULT.red);
+
+      // Red-yellow prepare phase
+      this.mainRoadLight.setState({ state: LightStateCode.PREPARE });
       await this.wait(this.timingConfig.MAIN_ROAD.redYellow);
-      this.mainRoadLight.setState(LightState.Green);
+
+      // Go phase
+      this.mainRoadLight.setState({ state: LightStateCode.GO });
       await this.setPhase(Phase.MAIN_ONLY);
     } catch (error) {
       console.error("Error transitioning to main road:", error);
-      // Reset to safe state
-      this.mainRoadLight.setState(LightState.Red);
+      this.mainRoadLight.setState({ state: LightStateCode.STOP });
       throw error;
     }
   }
 
   private async transitionToSideRoad(): Promise<void> {
     try {
-      this.sideRoadLight.setState(LightState.RedYellow);
+      // Ensure all other lights are red
+      this.mainRoadLight.setState({ state: LightStateCode.STOP });
+      this.pedestrianLight.setState({ state: LightStateCode.STOP });
+
+      // Wait between phases
+      await this.wait(this.timingConfig.DEFAULT.red);
+
+      // Red-yellow prepare phase
+      this.sideRoadLight.setState({ state: LightStateCode.PREPARE });
       await this.wait(this.timingConfig.DEFAULT.redYellow);
-      this.sideRoadLight.setState(LightState.Green);
-      await this.setPhase(Phase.SIDE_ONLY, this.timingConfig.DEFAULT.green);
+
+      // Go phase
+      this.sideRoadLight.setState({ state: LightStateCode.GO });
+      await this.setPhase(Phase.SIDE_ONLY);
     } catch (error) {
       console.error("Error transitioning to side road:", error);
-      // Reset to safe state
-      this.sideRoadLight.setState(LightState.Red);
+      this.sideRoadLight.setState({ state: LightStateCode.STOP });
       throw error;
     }
   }
 
   private async handlePedestrianPhase(): Promise<void> {
     try {
+      // Ensure all other lights are red
+      this.mainRoadLight.setState({ state: LightStateCode.STOP });
+      this.sideRoadLight.setState({ state: LightStateCode.STOP });
+
+      // Wait between phases
+      await this.wait(this.timingConfig.DEFAULT.red);
+
+      // Go phase for pedestrians
       this.pedestrianLight.setState({
-        state: PedestrianState.Green,
+        state: LightStateCode.GO,
         hasRequest: false,
       });
       await this.setPhase(Phase.PED_ONLY, this.timingConfig.PEDESTRIAN.green);
 
+      // Back to stop
       this.pedestrianLight.setState({
-        state: PedestrianState.Red,
+        state: LightStateCode.STOP,
         hasRequest: false,
       });
       await this.setPhase(
@@ -279,9 +246,8 @@ export class IntersectionController {
       );
     } catch (error) {
       console.error("Error handling pedestrian phase:", error);
-      // Reset to safe state
       this.pedestrianLight.setState({
-        state: PedestrianState.Red,
+        state: LightStateCode.STOP,
         hasRequest: false,
       });
       throw error;
@@ -290,57 +256,60 @@ export class IntersectionController {
 
   private async closeMainRoad(): Promise<void> {
     try {
-      this.mainRoadLight.setState(LightState.Yellow);
-      await this.setPhase(
-        Phase.MAIN_TO_SIDE,
-        this.timingConfig.MAIN_ROAD.yellow
-      );
-      this.mainRoadLight.setState(LightState.Red);
-      await this.wait(this.timingConfig.MAIN_ROAD.red);
+      // Yellow attention phase
+      this.mainRoadLight.setState({ state: LightStateCode.ATTENTION });
+      await this.wait(this.timingConfig.MAIN_ROAD.yellow);
+
+      // Stop phase
+      this.mainRoadLight.setState({ state: LightStateCode.STOP });
+      await this.setPhase(Phase.MAIN_TO_SIDE);
     } catch (error) {
       console.error("Error closing main road:", error);
-      // Reset to safe state
-      this.mainRoadLight.setState(LightState.Red);
+      this.mainRoadLight.setState({ state: LightStateCode.STOP });
       throw error;
     }
   }
 
   private async closeSideRoad(): Promise<void> {
     try {
-      this.sideRoadLight.setState(LightState.Yellow);
-      await this.setPhase(Phase.SIDE_TO_MAIN, this.timingConfig.DEFAULT.yellow);
-      this.sideRoadLight.setState(LightState.Red);
-      await this.wait(this.timingConfig.DEFAULT.red);
+      // Yellow attention phase
+      this.sideRoadLight.setState({ state: LightStateCode.ATTENTION });
+      await this.wait(this.timingConfig.DEFAULT.yellow);
+
+      // Stop phase
+      this.sideRoadLight.setState({ state: LightStateCode.STOP });
+      await this.setPhase(Phase.SIDE_TO_MAIN);
     } catch (error) {
       console.error("Error closing side road:", error);
-      // Reset to safe state
-      this.sideRoadLight.setState(LightState.Red);
+      this.sideRoadLight.setState({ state: LightStateCode.STOP });
       throw error;
     }
   }
 
   private async handleMainRoadPhase(): Promise<void> {
     try {
-      this.mainRoadLight.setState(LightState.Green);
-      this.sideRoadLight.setState(LightState.Red);
+      // Ensure all other lights are red
+      this.sideRoadLight.setState({ state: LightStateCode.STOP });
       this.pedestrianLight.setState({
-        state: PedestrianState.Red,
+        state: LightStateCode.STOP,
         hasRequest: false,
       });
+
+      // Go phase
+      this.mainRoadLight.setState({ state: LightStateCode.GO });
       await this.setPhase(Phase.MAIN_ONLY, this.timingConfig.MAIN_ROAD.green);
     } catch (error) {
       console.error("Error handling main road phase:", error);
-      // Reset to safe state
       this.resetToSafeState();
       throw error;
     }
   }
 
   private resetToSafeState(): void {
-    this.mainRoadLight.setState(LightState.Red);
-    this.sideRoadLight.setState(LightState.Red);
+    this.mainRoadLight.setState({ state: LightStateCode.STOP });
+    this.sideRoadLight.setState({ state: LightStateCode.STOP });
     this.pedestrianLight.setState({
-      state: PedestrianState.Red,
+      state: LightStateCode.STOP,
       hasRequest: false,
     });
     this.currentPhase = Phase.STOPPED;
@@ -369,13 +338,11 @@ export class IntersectionController {
         if (this.pedestrianLight.hasRequest()) {
           await this.closeSideRoad();
           await this.handlePedestrianPhase();
-          await this.transitionToSideRoad();
+          await this.transitionToMainRoad();
         } else {
           await this.closeSideRoad();
+          await this.transitionToMainRoad();
         }
-
-        // Back to main road
-        await this.transitionToMainRoad();
       } catch (error) {
         console.error("Error in traffic light cycle:", error);
         this.resetToSafeState();
@@ -393,10 +360,14 @@ export class IntersectionController {
       this.isRunning = true;
 
       // Initialize lights - main road starts with green flow
-      this.mainRoadLight.setState(LightState.Green);
-      this.sideRoadLight.setState(LightState.Red);
+      this.mainRoadLight.setState({
+        state: LightStateCode.GO,
+      });
+      this.sideRoadLight.setState({
+        state: LightStateCode.STOP,
+      });
       this.pedestrianLight.setState({
-        state: PedestrianState.Red,
+        state: LightStateCode.STOP,
         hasRequest: false,
       });
       this.currentPhase = Phase.MAIN_ONLY;
@@ -421,7 +392,7 @@ export class IntersectionController {
       this.clearAllTimers();
 
       // Start blinking which will set initial state and begin blinking
-      this.startBlinking();
+      this.setInitialLightStates();
 
       // Ensure state is updated
       this.notifyStateChange();
@@ -434,24 +405,9 @@ export class IntersectionController {
   }
 
   public requestPedestrian(): void {
-    try {
-      // Accept pedestrian requests any time except during pedestrian phases
-      // or when the system is stopped
-      if (
-        this.isRunning &&
-        this.currentPhase !== Phase.PED_ONLY &&
-        this.currentPhase !== Phase.SIDE_TO_PED &&
-        this.currentPhase !== Phase.PED_TO_SIDE
-      ) {
-        this.pedestrianLight.setState({
-          state: PedestrianState.Red,
-          hasRequest: true,
-        });
-        this.notifyStateChange();
-      }
-    } catch (error) {
-      console.error("Error processing pedestrian request:", error);
-    }
+    if (!this.isRunning) return;
+    this.pedestrianLight.setRequest(true);
+    this.notifyStateChange();
   }
 
   public dispose(): void {
@@ -469,13 +425,14 @@ export class IntersectionController {
 
   public getState(): IntersectionState {
     return {
-      mainRoad: this.mainRoadLight.getState(),
-      sideRoad: this.sideRoadLight.getState(),
+      mainRoad: this.mainRoadLight.getState().state,
+      sideRoad: this.sideRoadLight.getState().state,
       pedestrian: this.pedestrianLight.getState().state,
       pedestrianRequest: this.pedestrianLight.hasRequest(),
       currentPhase: this.currentPhase,
       isRunning: this.isRunning,
       statusText: PHASE_DESCRIPTIONS[this.currentPhase],
+      isWarning: !this.isRunning,
     };
   }
 }
